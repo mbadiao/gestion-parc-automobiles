@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+{% block title %}Dashboard Admin{% endblock %}
+
+{% block content %}
+<h2>Tableau de bord - Administrateur</h2>
+
+<!-- 🔍 Filtres -->
+<form method="get" class="mb-4 d-flex gap-3">
+    <select name="filtre_statut" class="form-select w-auto">
+        <option value="">-- Tous les statuts --</option>
+        <option value="disponible" {% if filtre_statut == 'disponible' %}selected{% endif %}>Disponible</option>
+        <option value="attribue" {% if filtre_statut == 'attribue' %}selected{% endif %}>Attribué</option>
+    </select>
+
+    <button type="submit" class="btn btn-primary">Filtrer</button>
+</form>
+
+<!-- 🚗 Liste des véhicules -->
+<h4>Véhicules</h4>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Marque</th>
+            <th>Modèle</th>
+            <th>Immatriculation</th>
+            <th>Statut</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for v in vehicules %}
+        <tr>
+            <td>{{ v.marque }}</td>
+            <td>{{ v.modele }}</td>
+            <td>{{ v.immatriculation }}</td>
+            <td>
+                {% if v.disponible %}
+                    <span class="badge bg-success">Disponible</span>
+                {% else %}
+                    <span class="badge bg-warning text-dark">Attribué</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="{{ url_for('admin.modifier_vehicule', vehicule_id=v.id) }}" class="btn btn-sm btn-info">Modifier</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<a href="{{ url_for('admin.ajouter_vehicule') }}" class="btn btn-success mb-5">➕ Ajouter un véhicule</a>
+
+<!-- 👨‍✈️ Liste des conducteurs -->
+<h4>Conducteurs</h4>
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for conducteur in conducteurs %}
+        <tr>
+            <td>{{ conducteur.nom }}</td>
+            <td>{{ conducteur.email }}</td>
+            <td>
+                <a href="{{ url_for('admin.attribuer_vehicule', conducteur_id=conducteur.id) }}" class="btn btn-sm btn-primary">Attribuer véhicule</a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- 🗺️ Carte des itinéraires -->
+<h4 class="mt-5">Carte des itinéraires</h4>
+
+<form method="get" class="mb-3 d-flex gap-3">
+    <input type="date" name="date" value="{{ date_filtre }}" class="form-control w-auto">
+    <select name="conducteur_id" class="form-select w-auto">
+        <option value="">-- Tous les conducteurs --</option>
+        {% for conducteur in conducteurs %}
+        <option value="{{ conducteur.id }}" {% if conducteur.id|string == conducteur_filtre %}selected{% endif %}>
+            {{ conducteur.nom }}
+        </option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-secondary">Filtrer la carte</button>
+</form>
+
+<div id="map" style="height: 400px;"></div>
+
+<script>
+    const map = L.map('map').setView([14.6928, -17.4467], 6); // Centre sur Dakar
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap'
+    }).addTo(map);
+
+    const itineraireData = {{ itineraire_data | tojson | safe }};
+
+    itineraireData.forEach(it => {
+        if (it.polyline) {
+            const points = decodePolyline(it.polyline);
+            const line = L.polyline(points, { color: 'blue' }).addTo(map);
+            map.fitBounds(line.getBounds());
+        }
+    });
+
+    function decodePolyline(encoded) {
+        let points = [];
+        let index = 0, lat = 0, lng = 0;
+        while (index < encoded.length) {
+            let b, shift = 0, result = 0;
+            do {
+                b = encoded.charCodeAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            lat += (result & 1) ? ~(result >> 1) : (result >> 1);
+
+            shift = 0;
+            result = 0;
+            do {
+                b = encoded.charCodeAt(index++) - 63;
+                result |= (b & 0x1f) << shift;
+                shift += 5;
+            } while (b >= 0x20);
+            lng += (result & 1) ? ~(result >> 1) : (result >> 1);
+
+            points.push([lat / 1e5, lng / 1e5]);
+        }
+        return points;
+    }
+</script>
+
+{% endblock %}

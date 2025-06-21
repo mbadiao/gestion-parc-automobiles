@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Tableau de bord Conducteur{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Bienvenue, {{ current_user.nom }}</h2>
+    <p>Voici vos trajets récents :</p>
+
+    <div id="map" style="height: 500px;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<!-- Leaflet CSS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+      integrity="sha512-sA+z0p1e+7i+f6ZQfhTyZK5R9Oho8Lq6+kaQ7kk7J1pPpjM1VRiNThJP5dEou8j05pEM3M/2I2PPlrGHZaZ/qQ=="
+      crossorigin=""/>
+
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+        integrity="sha512-QVfXQW8mX8RmvFUVJHt5zw4F5cIGPO+UhwOrLEsjViILZxvUChPfU6h0oDLPXTdpKOgU0rQ5l5XWx0zOjQPVtg=="
+        crossorigin=""></script>
+
+<script>
+    const trajets = {{ trajets | tojson }};
+    const map = L.map('map').setView([14.6928, -17.4467], 12); // Coordonnées pour Dakar par défaut
+
+    // Ajout de la couche OpenStreetMap
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+    }).addTo(map);
+
+    trajets.forEach(t => {
+        if (t.polyline) {
+            try {
+                const coords = JSON.parse(t.polyline); // On suppose que polyline est une liste de [lat, lng]
+                const latlngs = coords.map(c => [c[0], c[1]]);
+                L.polyline(latlngs, {color: 'blue'}).addTo(map);
+                map.fitBounds(latlngs); // Zoom automatique sur le trajet
+            } catch (e) {
+                console.error("Erreur de parsing du polyline :", e);
+            }
+        }
+    });
+</script>
+{% endblock %}
