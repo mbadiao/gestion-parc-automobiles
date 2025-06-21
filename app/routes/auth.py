@@ -24,9 +24,9 @@ def login():
     form = ConnexionForm()
     if form.validate_on_submit():
         user = Utilisateur.query.filter_by(email=form.email.data).first()
-        if user and check_password_hash(user.mot_de_passe, form.mot_de_passe.data):
+        if user and user.mot_de_passe == form.mot_de_passe.data:
             login_user(user, remember=form.se_souvenir.data)
-            flash("Connexion réussie ✅", "success")
+            # flash("Connexion réussie ✅", "success")
             next_page = request.args.get("next")
             return redirect(next_page or url_for("conducteur.dashboard" if user.role == "conducteur" else "admin.dashboard"))
         else:
@@ -34,7 +34,7 @@ def login():
 
     return render_template("login.html", form=form)
 
-# Déconnexion
+
 @auth_bp.route("/logout")
 @login_required
 def logout():

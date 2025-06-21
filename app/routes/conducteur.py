@@ -6,7 +6,7 @@ from datetime import date
 
 conducteur_bp = Blueprint("conducteur", __name__, url_prefix="/conducteur")
 
-@conducteur_bp.route("/")
+@conducteur_bp.route("/dashboard")
 @login_required
 def dashboard():
     if current_user.role != 'conducteur':

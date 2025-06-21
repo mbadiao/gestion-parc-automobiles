@@ -10,7 +10,7 @@ admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
 @admin_bp.route("/dashboard")
 @login_required
-def dashboard_admin():
+def dashboard():
     if current_user.role != 'admin':
         flash("Accès réservé à l'administrateur.", "danger")
         return redirect(url_for('auth.login'))
