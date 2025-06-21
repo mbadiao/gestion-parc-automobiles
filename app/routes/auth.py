@@ -13,7 +13,7 @@ def load_user(user_id):
     return Utilisateur.query.get(int(user_id))
 
 # Page de connexion
-@auth_bp.route("/login", methods=["GET", "POST"])
+@auth_bp.route("/", methods=["GET", "POST"])
 def login():
     if current_user.is_authenticated:
         if current_user.role == 'admin':
