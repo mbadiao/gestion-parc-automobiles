@@ -20,7 +20,6 @@ class Utilisateur(db.Model,UserMixin):
     role = db.Column(role_enum, nullable=False)
     actif = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
-
     profil = db.relationship("ConducteurProfil", backref="utilisateur", uselist=False)
     vehicule_assignations = db.relationship("VehiculeAssignation", backref="conducteur_utilisateur")
     itineraires = db.relationship("Itineraire", backref="conducteur_utilisateur")

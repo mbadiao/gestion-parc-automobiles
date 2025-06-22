@@ -1,0 +1,132 @@
+{% extends "base.html" %}
+{% block title %}Ajouter un conducteur{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vehicule_form.css') }}">
+
+<div class="vehicule-form-wrapper">
+    <h2>Ajouter un conducteur
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user-round"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+    </h2>
+    <form method="POST" class="vehicule-form" id="conducteurForm">
+        {{ form.hidden_tag() }}
+
+        <!-- Step 1 -->
+        <div class="step-section active" id="step-1">
+            <fieldset>
+                <legend>Identité</legend>
+                <div class="labels">
+                    {{ form.nom.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-user"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+                </div>
+                {{ form.nom(class="form-control", placeholder="Nom complet") }}
+
+                <div class="labels">
+                    {{ form.date_naissance.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+                </div>
+                {{ form.date_naissance(class="form-control", placeholder="Date de naissance") }}
+            </fieldset>
+            <div class="form-nav-btns">
+                <span></span>
+                <button type="button" class="btn btn-primary" onclick="nextStep(1)">Suivant &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-section" id="step-2">
+            <fieldset>
+                <legend>Contact</legend>
+                <div class="labels">
+                    {{ form.email.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/></svg>
+                </div>
+                {{ form.email(class="form-control", placeholder="Email") }}
+
+                <div class="labels">
+                    {{ form.telephone.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-phone"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 3.07 8.81 19.79 19.79 0 0 1 0 0.18 2 2 0 0 1 2 0h3a2 2 0 0 1 2 1.72c.13.81.36 1.6.68 2.34a2 2 0 0 1-.45 2.11l-1.27 1.27a16 16 0 0 0 6.29 6.29l1.27-1.27a2 2 0 0 1 2.11-.45c.74.32 1.53.55 2.34.68A2 2 0 0 1 22 16.92z"/></svg>
+                </div>
+                {{ form.telephone(class="form-control", placeholder="Téléphone") }}
+
+                <div class="labels">
+                    {{ form.adresse.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin"><path d="M12 21c-4.418 0-8-3.582-8-8 0-4.418 3.582-8 8-8s8 3.582 8 8c0 4.418-3.582 8-8 8z"/><circle cx="12" cy="13" r="4"/></svg>
+                </div>
+                {{ form.adresse(class="form-control", placeholder="Adresse") }}
+            </fieldset>
+            <div class="form-nav-btns">
+                <button type="button" class="btn btn-secondary" onclick="prevStep(2)">&larr; Précédent</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(2)">Suivant &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-section" id="step-3">
+            <fieldset>
+                <legend>Sécurité</legend>
+                <div class="labels">
+                    {{ form.mot_de_passe.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                {{ form.mot_de_passe(class="form-control", placeholder="Mot de passe") }}
+
+                <div class="labels">
+                    {{ form.mot_de_passe2.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                </div>
+                {{ form.mot_de_passe2(class="form-control", placeholder="Confirmer le mot de passe") }}
+            </fieldset>
+            <div class="form-nav-btns">
+                <button type="button" class="btn btn-secondary" onclick="prevStep(3)">&larr; Précédent</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(3)">Suivant &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-section" id="step-4">
+            <fieldset>
+                <legend>Permis</legend>
+                <div class="labels">
+                    {{ form.permis_conduit.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-check"><path d="M7 10v2a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2v-2"/><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2Z"/><path d="m9 12 2 2 4-4"/></svg>
+                </div>
+                {{ form.permis_conduit(class="form-control", placeholder="Permis de conduire") }}
+            </fieldset>
+            <div class="form-nav-btns">
+                <button type="button" class="btn btn-secondary" onclick="prevStep(4)">&larr; Précédent</button>
+                <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function showStep(step) {
+    document.querySelectorAll('.step-section').forEach(function(div) {
+        div.classList.remove('active');
+    });
+    document.getElementById('step-' + step).classList.add('active');
+    // Désactive tous les champs sauf ceux de l'étape active
+    document.querySelectorAll('.step-section').forEach(function(div) {
+        div.querySelectorAll('input, select, textarea, button').forEach(function(el) {
+            if (div.classList.contains('active')) {
+                el.disabled = false;
+            } else {
+                if (el.type !== "button" && el.type !== "submit") el.disabled = true;
+            }
+        });
+    });
+}
+
+function nextStep(current) { showStep(current + 1); }
+function prevStep(current) { showStep(current - 1); }
+document.addEventListener('DOMContentLoaded', function() { showStep(1); });
+// Réactive tous les champs avant la soumission pour Flask-WTF
+document.getElementById('conducteurForm').addEventListener('submit', function(e) {
+    document.querySelectorAll('.step-section input, .step-section select, .step-section textarea').forEach(function(el) {
+        el.disabled = false;
+    });
+});
+</script>
+{% endblock %}

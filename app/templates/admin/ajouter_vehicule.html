@@ -1,1 +1,162 @@
-{% extends "base.html" %}
+ {% extends "base.html" %}
+{% block title %}Ajouter un véhicule{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vehicule_form.css') }}">
+<style>
+.step-section { display: none; }
+.step-section.active { display: block; }
+.form-nav-btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1.5rem;
+}
+</style>
+
+<div class="vehicule-form-wrapper">
+    <h2>Ajouter un véhicule
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-car"><rect width="18" height="8" x="3" y="10" rx="2"/><path d="M5 18v-2"/><path d="M19 18v-2"/><path d="M7 10V6a5 5 0 0 1 10 0v4"/></svg>
+    </h2>
+    <form method="POST" class="vehicule-form" id="vehiculeForm">
+        {{ form.hidden_tag() }}
+
+        <!-- Step 1 -->
+        <div class="step-section active" id="step-1">
+            <fieldset>
+                <legend>Informations principales</legend>
+                <div class="labels">
+                    {{ form.marque.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-badge-cent"><circle cx="12" cy="12" r="10"/><path d="M9 15.5V15a3 3 0 0 1 6 0v.5"/><path d="M9 9V8.5a3 3 0 0 1 6 0V9"/></svg>
+                </div>
+                {{ form.marque(class="form-control", placeholder="Marque") }}
+
+                <div class="labels">
+                    {{ form.modele.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-car-front"><rect x="3" y="11" width="18" height="6" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/><path d="M7 17v2"/><path d="M17 17v2"/></svg>
+                </div>
+                {{ form.modele(class="form-control", placeholder="Modèle") }}
+
+                <div class="labels">
+                    {{ form.annee.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg>
+                </div>
+                {{ form.annee(class="form-control", placeholder="Année") }}
+
+                <div class="labels">
+                    {{ form.immatriculation.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-hash"><line x1="4" y1="9" x2="20" y2="9"/><line x1="4" y1="15" x2="20" y2="15"/><line x1="10" y1="3" x2="8" y2="21"/><line x1="16" y1="3" x2="14" y2="21"/></svg>
+                </div>
+                {{ form.immatriculation(class="form-control", placeholder="Immatriculation") }}
+            </fieldset>
+            <div class="form-nav-btns">
+                <span></span>
+                <button type="button" class="btn btn-primary" onclick="nextStep(1)">Suivant &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="step-section" id="step-2">
+            <fieldset>
+                <legend>Couleurs & Carburant</legend>
+                <div class="labels">
+                    {{ form.couleur_exterieure.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-palette"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 22a10 10 0 1 1 10-10c0 5.523-4.477 10-10 10Z"/></svg>
+                </div>
+                {{ form.couleur_exterieure(class="form-control", placeholder="Couleur extérieure") }}
+
+                <div class="labels">
+                    {{ form.couleur_interieure.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-paintbrush"><path d="M2 18a2 2 0 0 0 2 2 2 2 0 0 0 2-2c0-.5-.2-1-.6-1.4L2 14.6c-.4.4-.6.9-.6 1.4Z"/><path d="M18.7 2.3a2.4 2.4 0 0 1 3.4 3.4L7.6 20.2a2.4 2.4 0 0 1-3.4-3.4Z"/></svg>
+                </div>
+                {{ form.couleur_interieure(class="form-control", placeholder="Couleur intérieure") }}
+
+                <div class="labels">
+                    {{ form.type_carburant.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flame"><path d="M8.5 14.5c-1.5-1.5-2.5-3.5-2.5-5.5C6 5.5 9.5 2 12 2s6 3.5 6 7c0 2-1 4-2.5 5.5"/><path d="M12 22c-4-2-7-6-7-10a7 7 0 0 1 14 0c0 4-3 8-7 10Z"/></svg>
+                </div>
+                {{ form.type_carburant(class="form-control") }}
+
+                <div class="labels">
+                    {{ form.transmission.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-settings"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h.09a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h.09a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v.09a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                </div>
+                {{ form.transmission(class="form-control") }}
+            </fieldset>
+            <div class="form-nav-btns">
+                <button type="button" class="btn btn-secondary" onclick="prevStep(2)">&larr; Précédent</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(2)">Suivant &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="step-section" id="step-3">
+            <fieldset>
+                <legend>Performances</legend>
+                <div class="labels">
+                    {{ form.puissance.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-bolt"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                </div>
+                {{ form.puissance(class="form-control", placeholder="Puissance") }}
+
+                <div class="labels">
+                    {{ form.kilometrage.label(class="form-label") }}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-gauge"><path d="M12 15v2"/><path d="M12 3a9 9 0 1 0 9 9"/><path d="M12 3v2"/><path d="M12 19v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.22 19.78l1.42-1.42"/><path d="M18.36 5.64l1.42-1.42"/></svg>
+                </div>
+                {{ form.kilometrage(class="form-control", placeholder="Kilométrage") }}
+            </fieldset>
+            <div class="form-nav-btns">
+                <button type="button" class="btn btn-secondary" onclick="prevStep(3)">&larr; Précédent</button>
+                <button type="button" class="btn btn-primary" onclick="nextStep(3)">Suivant &rarr;</button>
+            </div>
+        </div>
+
+        <!-- Step 4 -->
+        <div class="step-section" id="step-4">
+            <fieldset>
+                <legend>Disponibilité</legend>
+                <div class="form-check">
+                    {{ form.disponible() }} {{ form.disponible.label }}
+                </div>
+            </fieldset>
+            <div class="form-nav-btns">
+                <button type="button" class="btn btn-secondary" onclick="prevStep(4)">&larr; Précédent</button>
+                <button type="submit" class="btn btn-primary">{{ form.submit.label.text }}</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+function showStep(step) {
+    document.querySelectorAll('.step-section').forEach(function(div, idx) {
+        if (div.id === 'step-' + step) {
+            div.classList.add('active');
+            // Réactive les champs de l'étape visible
+            div.querySelectorAll('input, select, textarea, button').forEach(function(el) {
+                el.disabled = false;
+            });
+        } else {
+            div.classList.remove('active');
+            // Désactive les champs des étapes cachées
+            div.querySelectorAll('input, select, textarea, button').forEach(function(el) {
+                if (el.type !== "button" && el.type !== "submit") el.disabled = true;
+            });
+        }
+    });
+}
+function nextStep(current) { showStep(current + 1); }
+function prevStep(current) { showStep(current - 1); }
+
+// Initialisation : désactive tous les champs sauf ceux de la première étape
+document.addEventListener('DOMContentLoaded', function() {
+    showStep(1);
+});
+
+document.getElementById('vehiculeForm').addEventListener('submit', function(e) {
+    // Réactive tous les champs avant l'envoi
+    document.querySelectorAll('.step-section input, .step-section select, .step-section textarea').forEach(function(el) {
+        el.disabled = false;
+    });
+});
+</script>
+{% endblock %}

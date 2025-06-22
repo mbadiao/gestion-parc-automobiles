@@ -1,1 +1,66 @@
 {% extends "base.html" %}
+{% block title %}Attribuer un véhicule{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/attribuer_vehicule.css') }}">
+
+<div class="vehicule-form-wrapper">
+    <h2>Attribuer un véhicule à {{ conducteur.nom }}</h2>
+    <form method="POST">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Marque</th>
+                    <th>Modèle</th>
+                    <th>Immatriculation</th>
+                    <th>Statut</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for v in vehicules %}
+                <tr>
+                    <td>{{ v.marque }}</td>
+                    <td>{{ v.modele }}</td>
+                    <td>{{ v.immatriculation }}</td>
+                    <td>
+                        <span class="badge badge-dispo"><i class="fa-solid fa-circle-check"></i> Disponible</span>
+                    </td>
+                    <td>
+                        {% if v.disponible %}
+                            <button type="submit" name="vehicule_id" value="{{ v.id }}" class="btn btn-primary">Choisir</button>
+                        {% else %}
+                            <button type="button" class="btn btn-secondary" disabled style="opacity:0.7;cursor:not-allowed;">Indisponible</button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="form-nav-btns" style="margin-top:2rem;">
+            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Annuler</a>
+        </div>
+    </form>
+</div>
+
+<style>
+.badge-dispo {
+    background: linear-gradient(90deg, #2ecc71 60%, #4eeb7f 100%);
+    color: #1e1e2f;
+    border-radius: 0.5rem;
+    padding: 0.35em 0.8em;
+    font-weight: 600;
+    font-size: 0.98rem;
+    letter-spacing: 0.5px;
+}
+.badge-indispo {
+    background: linear-gradient(90deg, #e74c3c 60%, #ff7675 100%);
+    color: #fff;
+    border-radius: 0.5rem;
+    padding: 0.35em 0.8em;
+    font-weight: 600;
+    font-size: 0.98rem;
+    letter-spacing: 0.5px;
+}
+</style>
+{% endblock %}

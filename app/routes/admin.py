@@ -1,9 +1,11 @@
 from flask import Blueprint, render_template, redirect, url_for, request, flash
 from flask_login import login_required, current_user
 from app import db
-from app.models import Vehicule, Utilisateur, Itineraire
-from app.forms import VehiculeForm
-from datetime import datetime
+from app.models import Vehicule, Utilisateur, Itineraire, ConducteurProfil
+from sqlalchemy.exc import IntegrityError
+from app.forms import VehiculeForm, ConducteurForm
+from datetime import datetime, date
+from app.models import VehiculeAssignation
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/admin")
 
@@ -27,8 +29,10 @@ def dashboard():
         vehicules = vehicules.filter_by(disponible=False)
     vehicules = vehicules.all()
 
-    # Tous les conducteurs
-    conducteurs = Utilisateur.query.filter_by(role='conducteur').all()
+    # Conducteurs sans véhicule attribué (basé sur la table d'assignation)
+    # On sélectionne les conducteurs qui n'ont pas d'assignation active
+    subquery = db.session.query(VehiculeAssignation.conducteur_id).filter(VehiculeAssignation.active == True)
+    conducteurs = Utilisateur.query.filter_by(role='conducteur').filter(~Utilisateur.id.in_(subquery)).all()
 
     # Filtrage des itinéraires
     itineraires = Itineraire.query
@@ -59,7 +63,6 @@ def ajouter_vehicule():
         return redirect(url_for("auth.login"))
 
     form = VehiculeForm()
-
     if form.validate_on_submit():
         vehicule = Vehicule(
             marque=form.marque.data,
@@ -75,9 +78,22 @@ def ajouter_vehicule():
             disponible=True
         )
         db.session.add(vehicule)
-        db.session.commit()
-        flash("Véhicule ajouté avec succès", "success")
-        return redirect(url_for("admin.dashboard_admin"))
+        try:
+            db.session.commit()
+            flash("Véhicule ajouté avec succès", "success")
+            return redirect(url_for("admin.dashboard"))
+        except IntegrityError as e:
+            db.session.rollback()
+            if "vehicule_immatriculation_key" in str(e.orig):
+                flash("Cette immatriculation existe déjà.", "danger")
+            else:
+                flash("Erreur lors de l'ajout du véhicule.", "danger")
+    elif request.method == "POST":
+        # Afficher les erreurs du formulaire
+        print("Form errors:", form.errors)
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Erreur dans le champ '{getattr(form, field).label.text}': {error}", "danger")
 
     return render_template("admin/ajouter_vehicule.html", form=form)
 
@@ -117,14 +133,57 @@ def attribuer_vehicule(conducteur_id):
         if vehicule:
             # Marquer véhicule comme attribué
             vehicule.disponible = False
+            # Créer une assignation
+            assignation = VehiculeAssignation(
+                conducteur_id=conducteur.id,
+                vehicule_id=vehicule.id,
+                date_debut=date.today(),
+                active=True
+            )
+            db.session.add(assignation)
             db.session.commit()
-
-            # Ajouter une assignation (bonus)
-            # ...
-
             flash("Véhicule attribué avec succès", "success")
-            return redirect(url_for("admin.dashboard_admin"))
+            return redirect(url_for("admin.dashboard"))
 
     return render_template("admin/attribuer_vehicule.html",
                            conducteur=conducteur,
                            vehicules=vehicules_dispos)
+
+@admin_bp.route("/conducteur/ajouter", methods=["GET", "POST"])
+@login_required
+def ajouter_conducteur():
+    if current_user.role != 'admin':
+        flash("Accès interdit", "danger")
+        return redirect(url_for("auth.login"))
+
+    form = ConducteurForm()
+    if form.validate_on_submit():
+        conducteur = Utilisateur(
+            nom=form.nom.data,
+            email=form.email.data,
+            mot_de_passe=form.mot_de_passe.data,
+            role='conducteur',
+            actif=True
+        )
+        db.session.add(conducteur)
+        db.session.flush()  # Pour obtenir l'ID du conducteur avant de créer le profil
+
+        conducteur.profil = ConducteurProfil(
+            utilisateur_id=conducteur.id,
+            adresse=form.adresse.data,
+            telephone=form.telephone.data,
+            permis_conduit=form.permis_conduit.data,
+            date_naissance=form.date_naissance.data
+        )
+        db.session.add(conducteur.profil)
+        try:
+            db.session.commit()
+            flash("Conducteur ajouté avec succès", "success")
+            return redirect(url_for("admin.dashboard"))
+        except IntegrityError as e:
+            db.session.rollback()
+            if "utilisateur_email_key" in str(e.orig):
+                flash("Cet email est déjà utilisé.", "danger")
+            else:
+                flash("Erreur lors de l'ajout du conducteur.", "danger")
+    return render_template("admin/ajouter_conducteur.html", form=form)

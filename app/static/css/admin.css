@@ -10,6 +10,61 @@ h2, h4 {
     margin-top: 1.5rem;
 }
 
+/* ========== Dashboard Admin - UI épurée, moderne, sombre et responsive ========== */
+.admin-dashboard {
+    padding: 2rem;
+    margin: auto;
+    background: #23233a;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(30,30,47,0.15);
+}
+
+.dashboard-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 2.2rem;
+    gap: 1.2rem;
+}
+
+.dashboard-header h2 {
+    color: #a992f7;
+    font-size: 2.1rem;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+}
+
+.dashboard-header .btn-add {
+    background: linear-gradient(90deg, #7e6edb 60%, #4e88ff 100%);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8rem 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    box-shadow: 0 2px 8px rgba(126,110,219,0.08);
+    transition: background 0.18s;
+}
+.dashboard-header .btn-add:hover {
+    background: linear-gradient(90deg, #6b5bcf 60%, #3572f0 100%);
+}
+
+.section-title {
+    color: #7e6edb;
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 2.5rem 0 1.2rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
 /* ========== Boutons ========== */
 button, .btn {
     padding: 0.5rem 1rem;
@@ -23,12 +78,11 @@ button, .btn {
 }
 
 .btn-primary {
-    background-color: #4e88ff;
-    color: white;
+    background: linear-gradient(90deg, #7e6edb 60%, #4e88ff 100%);
+    color: #fff;
 }
-
 .btn-primary:hover {
-    background-color: #3572f0;
+    background: linear-gradient(90deg, #6b5bcf 60%, #3572f0 100%);
 }
 
 .btn-secondary {
@@ -41,47 +95,57 @@ button, .btn {
 }
 
 .btn-success {
-    background-color: #2ecc71;
-    color: white;
+    background: linear-gradient(90deg, #3fd18b 60%, #7ee787 100%);
+    color: #23233a;
 }
-
 .btn-success:hover {
-    background-color: #27ae60;
+    background: linear-gradient(90deg, #2ecc71 60%, #27ae60 100%);
+    color: #fff;
 }
 
 .btn-info {
-    background-color: #3498db;
-    color: white;
+    background: #3498db;
+    color: #fff;
 }
-
 .btn-info:hover {
-    background-color: #2980b9;
+    background: #2980b9;
 }
 
 /* ========== Tables ========== */
 table {
     width: 100%;
-    border-collapse: collapse;
-    margin-top: 1rem;
-    margin-bottom: 2rem;
-    background-color: #2a2a3b;
-    border-radius: 8px;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: #23233a;
+    border-radius: 12px;
     overflow: hidden;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 12px rgba(30,30,47,0.10);
 }
 
-th, td {
-    padding: 0.75rem;
-    text-align: left;
-    border-bottom: 1px solid #3a3a4f;
+.table thead tr {
+    background: #292944;
 }
 
-th {
-    background-color: #2f2f45;
+.table th, .table td {
+    padding: 1rem 0.7rem;
+    text-align: center;
+    font-size: 1.05rem;
+}
+
+.table th {
+    color: #a992f7;
     font-weight: 600;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #35355a;
 }
 
-tr:hover {
-    background-color: #383850;
+.table tbody tr {
+    transition: background 0.15s;
+}
+
+.table tbody tr:hover {
+    background: #2e2d3f;
 }
 
 .table-hover tr:hover {
@@ -104,6 +168,33 @@ tr:hover {
 .bg-warning {
     background-color: #f1c40f;
     color: black;
+}
+
+.badge-dispo {
+    background: linear-gradient(90deg, #3fd18b 60%, #7ee787 100%);
+    color: #1e1e2f;
+    border-radius: 0.7rem;
+    padding: 0.4em 1em;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    box-shadow: 0 1px 4px rgba(63,209,139,0.08);
+}
+.badge-attribue {
+    background: linear-gradient(90deg, #f1c40f 60%, #ffecb3 100%);
+    color: #23233a;
+    border-radius: 0.7rem;
+    padding: 0.4em 1em;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    box-shadow: 0 1px 4px rgba(241,196,15,0.08);
 }
 
 /* ========== Formulaires et filtres ========== */
@@ -131,6 +222,25 @@ select::placeholder {
     color: #aaa;
 }
 
+.form-select, .form-control {
+    background: #292944;
+    border: 1.5px solid #444;
+    color: #e7e6fa;
+    border-radius: 10px;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+    margin-bottom: 0.7rem;
+    transition: border 0.2s, background 0.2s;
+    box-shadow: 0 2px 8px rgba(50,50,80,0.04);
+}
+
+.form-select:focus, .form-control:focus {
+    border: 2px solid #a992f7;
+    outline: none;
+    background: #35355a;
+    color: #fff;
+}
+
 /* ========== Carte ========== */
 #map {
     border: 2px solid #3a3a4f;
@@ -138,23 +248,59 @@ select::placeholder {
     margin-bottom: 2rem;
 }
 
+/* ========== Marges et espacements ========== */
+.mb-4 {
+    margin-bottom: 2rem !important;
+}
+
+.d-flex {
+    display: flex;
+    align-items: center;
+}
+.gap-3 {
+    gap: 1.2rem;
+}
+
 /* ========== Responsive ========== */
-@media (max-width: 768px) {
-    table, thead, tbody, th, td, tr {
+@media (max-width: 900px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+    .table th, .table td {
+        font-size: 0.98rem;
+        padding: 0.7rem 0.3rem;
+    }
+    .btn, .btn-sm {
+        font-size: 0.97rem;
+        padding: 0.6rem 1rem;
+    }
+}
+
+@media (max-width: 600px) {
+    .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.7rem;
+    }
+    .table, .table thead, .table tbody, .table th, .table td, .table tr {
         display: block;
+        width: 100%;
     }
-
-    tr {
+    .table thead {
+        display: none;
+    }
+    .table tr {
         margin-bottom: 1rem;
-        border-bottom: 1px solid #3a3a4f;
+        border-bottom: 1px solid #35355a;
     }
-
-    td {
+    .table td {
         padding-left: 50%;
         position: relative;
+        text-align: left;
     }
-
-    td::before {
+    .table td::before {
         content: attr(data-label);
         position: absolute;
         left: 0;
@@ -162,11 +308,11 @@ select::placeholder {
         width: 45%;
         padding-left: 1rem;
         font-weight: bold;
-        color: #aaa;
+        color: #a992f7;
     }
-
-    form {
+    .d-flex {
         flex-direction: column;
         align-items: flex-start;
+        gap: 0.7rem;
     }
 }
