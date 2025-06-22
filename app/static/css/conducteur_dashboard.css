@@ -1,0 +1,109 @@
+.conducteur-dashboard {
+    display: flex;
+    gap: 2.5rem;
+    min-height: 600px;
+    margin-top: 2rem;
+}
+
+.trajets-panel {
+    width: 340px;
+    background: linear-gradient(135deg, #23233a 60%, #2e2d3f 100%);
+    border-radius: 18px;
+    padding: 2rem 1.2rem;
+    box-shadow: 0 8px 32px rgba(30,30,47,0.13);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.panel-title {
+    color: #a992f7;
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    letter-spacing: 1px;
+}
+
+.trajet-list {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.1rem;
+}
+
+.trajet-card {
+    background: #292944;
+    border-radius: 12px;
+    padding: 1.1rem 1rem;
+    box-shadow: 0 2px 8px rgba(50,50,80,0.07);
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border 0.2s, background 0.2s;
+}
+.trajet-card.active {
+    border: 2px solid #a992f7;
+    background: #23233a;
+}
+.trajet-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.7rem;
+}
+.trajet-date {
+    color: #7e6edb;
+    font-weight: 600;
+    font-size: 1.05rem;
+}
+.badge-en-cours {
+    background: linear-gradient(90deg, #3fd18b 60%, #7ee787 100%);
+    color: #23233a;
+    border-radius: 0.7rem;
+    padding: 0.3em 0.9em;
+    font-weight: 600;
+    font-size: 0.98rem;
+    letter-spacing: 0.5px;
+}
+.trajet-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+.trajet-info i {
+    color: #a992f7;
+    margin-right: 0.5em;
+}
+.trajet-info span {
+    color: #e7e6fa;
+    font-size: 1.01rem;
+}
+
+.map-section {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: stretch;
+}
+
+#map {
+    width: 100%;
+    height: 100%;
+    min-height: 500px;
+    border-radius: 18px;
+    box-shadow: 0 8px 32px rgba(30,30,47,0.13);
+}
+
+@media (max-width: 900px) {
+    .conducteur-dashboard {
+        flex-direction: column;
+        gap: 1.2rem;
+    }
+    .trajets-panel {
+        width: 100%;
+        margin-bottom: 1.2rem;
+    }
+    .map-section {
+        min-height: 350px;
+    }
+}

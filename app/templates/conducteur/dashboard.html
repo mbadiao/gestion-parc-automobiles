@@ -1,47 +1,86 @@
 {% extends "base.html" %}
-
 {% block title %}Tableau de bord Conducteur{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2>Bienvenue, {{ current_user.nom }}</h2>
-    <p>Voici vos trajets récents :</p>
-
-    <div id="map" style="height: 500px;"></div>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/conducteur_dashboard.css') }}">
+<div class="conducteur-dashboard">
+    <aside class="trajets-panel">
+        <h3 class="panel-title">Mes trajets</h3>
+        <div class="trajet-list">
+            {% for trajet in trajets %}
+            <div class="trajet-card{% if loop.first %} active{% endif %}" data-trajet="{{ trajet.id }}" onclick="selectTrajet({{ trajet.id }})">
+                <div class="trajet-header">
+                    <span class="trajet-date">{{ trajet.date_trajet.strftime('%d/%m/%Y') }}</span>
+                    {% if loop.first %}
+                    <span class="badge badge-en-cours">En cours</span>
+                    {% endif %}
+                </div>
+                <div class="trajet-info">
+                    <div>
+                        <i class="fa-solid fa-location-dot"></i>
+                        <span>{{ trajet.lieu_depart }}</span>
+                    </div>
+                    <div>
+                        <i class="fa-solid fa-location-arrow"></i>
+                        <span>{{ trajet.lieu_arrivee }}</span>
+                    </div>
+                    <div>
+                        <i class="fa-solid fa-road"></i>
+                        <span>{{ trajet.distance_km }} km</span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </aside>
+    <section class="map-section">
+        <div id="map" style="height: 100%; min-height: 500px; border-radius: 18px;"></div>
+    </section>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<!-- Leaflet CSS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
-      integrity="sha512-sA+z0p1e+7i+f6ZQfhTyZK5R9Oho8Lq6+kaQ7kk7J1pPpjM1VRiNThJP5dEou8j05pEM3M/2I2PPlrGHZaZ/qQ=="
-      crossorigin=""/>
-
-<!-- Leaflet JS -->
-<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
-        integrity="sha512-QVfXQW8mX8RmvFUVJHt5zw4F5cIGPO+UhwOrLEsjViILZxvUChPfU6h0oDLPXTdpKOgU0rQ5l5XWx0zOjQPVtg=="
-        crossorigin=""></script>
-
+<!-- Leaflet CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
 <script>
     const trajets = {{ trajets | tojson }};
-    const map = L.map('map').setView([14.6928, -17.4467], 12); // Coordonnées pour Dakar par défaut
+    let map, polylines = [];
 
-    // Ajout de la couche OpenStreetMap
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(map);
-
-    trajets.forEach(t => {
-        if (t.polyline) {
+    function showTrajetOnMap(trajet) {
+        // Efface les anciens polylines
+        polylines.forEach(p => map.removeLayer(p));
+        polylines = [];
+        if (trajet.polyline) {
             try {
-                const coords = JSON.parse(t.polyline); // On suppose que polyline est une liste de [lat, lng]
+                const coords = JSON.parse(trajet.polyline);
                 const latlngs = coords.map(c => [c[0], c[1]]);
-                L.polyline(latlngs, {color: 'blue'}).addTo(map);
-                map.fitBounds(latlngs); // Zoom automatique sur le trajet
+                const poly = L.polyline(latlngs, {color: '#a992f7', weight: 5}).addTo(map);
+                polylines.push(poly);
+                map.fitBounds(poly.getBounds(), {padding: [40, 40]});
+                // Marqueurs départ/arrivée
+                L.circleMarker(latlngs[0], {radius: 8, color: "#3fd18b", fillColor: "#3fd18b", fillOpacity: 1}).addTo(map);
+                L.circleMarker(latlngs[latlngs.length-1], {radius: 8, color: "#e74c3c", fillColor: "#e74c3c", fillOpacity: 1}).addTo(map);
             } catch (e) {
                 console.error("Erreur de parsing du polyline :", e);
             }
         }
+    }
+
+    function selectTrajet(id) {
+        document.querySelectorAll('.trajet-card').forEach(card => card.classList.remove('active'));
+        const card = document.querySelector('.trajet-card[data-trajet="'+id+'"]');
+        if(card) card.classList.add('active');
+        const trajet = trajets.find(t => t.id === id);
+        if(trajet) showTrajetOnMap(trajet);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        map = L.map('map').setView([14.6928, -17.4467], 12);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+        if(trajets.length) showTrajetOnMap(trajets[0]);
     });
 </script>
 {% endblock %}

@@ -3,7 +3,7 @@ from flask_login import login_required, current_user
 from app import db
 from app.models import Vehicule, Utilisateur, Itineraire, ConducteurProfil
 from sqlalchemy.exc import IntegrityError
-from app.forms import VehiculeForm, ConducteurForm
+from app.forms import VehiculeForm, ConducteurForm, ItineraireForm
 from datetime import datetime, date
 from app.models import VehiculeAssignation
 
@@ -21,7 +21,6 @@ def dashboard():
     date_filtre = request.args.get('date')
     conducteur_filtre = request.args.get('conducteur_id')
 
-    # Filtrage véhicules
     vehicules = Vehicule.query
     if filtre_statut == "disponible":
         vehicules = vehicules.filter_by(disponible=True)
@@ -29,26 +28,16 @@ def dashboard():
         vehicules = vehicules.filter_by(disponible=False)
     vehicules = vehicules.all()
 
-    # Conducteurs sans véhicule attribué (basé sur la table d'assignation)
-    # On sélectionne les conducteurs qui n'ont pas d'assignation active
+    # Assignations actives (véhicule attribué à un conducteur)
+    assignations = VehiculeAssignation.query.filter_by(active=True).all()
+
     subquery = db.session.query(VehiculeAssignation.conducteur_id).filter(VehiculeAssignation.active == True)
     conducteurs = Utilisateur.query.filter_by(role='conducteur').filter(~Utilisateur.id.in_(subquery)).all()
-
-    # Filtrage des itinéraires
-    itineraires = Itineraire.query
-
-    if date_filtre:
-        try:
-            date_obj = datetime.strptime(date_filtre, "%Y-%m-%d")
-            itineraires = itineraires.filter_by(date_trajet=date_obj.date())
-        except ValueError:
-            flash("Format de date invalide", "warning")
-
-
 
     return render_template("admin/dashboard.html",
                            vehicules=vehicules,
                            conducteurs=conducteurs,
+                           assignations=assignations,
                            filtre_statut=filtre_statut,
                            date_filtre=date_filtre,
                            conducteur_filtre=conducteur_filtre
@@ -187,3 +176,24 @@ def ajouter_conducteur():
             else:
                 flash("Erreur lors de l'ajout du conducteur.", "danger")
     return render_template("admin/ajouter_conducteur.html", form=form)
+
+@admin_bp.route("/itineraire/ajouter/<int:conducteur_id>/<int:vehicule_id>", methods=["GET", "POST"])
+@login_required
+def ajouter_itineraire(conducteur_id, vehicule_id):
+    form = ItineraireForm()
+    if form.validate_on_submit():
+        trajet = Itineraire(
+            conducteur_id=conducteur_id,
+            vehicule_id=vehicule_id,
+            date_trajet=form.date_trajet.data,
+            lieu_depart=form.lieu_depart.data,
+            lieu_arrivee=form.lieu_arrivee.data,
+            distance_km=form.distance_km.data,
+            duree_minutes=form.duree_minutes.data,
+            polyline=form.polyline.data
+        )
+        db.session.add(trajet)
+        db.session.commit()
+        flash("Itinéraire ajouté avec succès", "success")
+        return redirect(url_for("admin.dashboard"))
+    return render_template("admin/itineraire_form.html", form=form)
