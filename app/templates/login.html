@@ -2,47 +2,35 @@
 {% block title %}Connexion{% endblock %}
 
 {% block content %}
-<div class="container mt-5" style="max-width: 500px;">
-    <h2 class="text-center mb-4">Connexion</h2>
-  
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-            {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-          </div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-    
-    <form method="POST" novalidate>
-        {{ form.hidden_tag() }}
 
-        <div class="mb-3">
-            {{ form.email.label(class="form-label") }}
-            {{ form.email(class="form-control", placeholder="Adresse email") }}
-            {% if form.email.errors %}
-                <div class="text-danger">{{ form.email.errors[0] }}</div>
-            {% endif %}
+ <div class="auth-wrapper">
+    <div class="auth-image">
+        <div class="auth-image-text">
+            Capturer des moments, <br> Créer des souvenirs
         </div>
+    </div>
+    <div class="auth-form">
+        <h2 >Connectez-vous <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-log-in-icon lucide-log-in"><path d="m10 17 5-5-5-5"/><path d="M15 12H3"/><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/></svg></h2>
 
-        <div class="mb-3">
-            {{ form.mot_de_passe.label(class="form-label") }}
-            {{ form.mot_de_passe(class="form-control", placeholder="Mot de passe") }}
-            {% if form.mot_de_passe.errors %}
-                <div class="text-danger">{{ form.mot_de_passe.errors[0] }}</div>
-            {% endif %}
-        </div>
+        <form  method="POST" novalidate>
+            {{ form.hidden_tag() }}
 
-        <div class="form-check mb-3">
-            {{ form.se_souvenir(class="form-check-input") }}
-            {{ form.se_souvenir.label(class="form-check-label") }}
-        </div>
+            <div class="form">
+              <div class="labels">{{ form.email.label(class="form-label") }} <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mail-icon lucide-mail"><path d="m22 7-8.991 5.727a2 2 0 0 1-2.009 0L2 7"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg></div>
+              
+            <div class="mb-3">
+                {{ form.email(class="form-control", placeholder="Entrez votre Email") }}
+            </div>
+            
+            <div class="labels">{{ form.mot_de_passe.label(class="form-label") }} <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-lock-icon lucide-lock"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+            <div class="mb-3">
+                {{ form.mot_de_passe(class="form-control", placeholder="Entrez votre mot de passe") }}
+            </div>
+            </div>
 
-        <div class="d-grid">
-            {{ form.submit(class="btn btn-primary") }}
-        </div>
-    </form>
-</div>
+            <div class="submit-connection">
+                {{ form.submit(class="btn btn-primary") }}
+            </div>
+        </form>
+    </div>
 {% endblock %}

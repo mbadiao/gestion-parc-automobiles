@@ -40,25 +40,15 @@ def dashboard():
         except ValueError:
             flash("Format de date invalide", "warning")
 
-    if conducteur_filtre:
-        itineraires = itineraires.filter_by(conducteur_id=int(conducteur_filtre))
 
-    itineraire_data = [
-        {
-            "polyline": i.polyline,
-            "conducteur_id": i.conducteur_id,
-            "date_trajet": i.date_trajet.strftime("%Y-%m-%d")
-        }
-        for i in itineraires
-    ]
 
     return render_template("admin/dashboard.html",
                            vehicules=vehicules,
                            conducteurs=conducteurs,
                            filtre_statut=filtre_statut,
                            date_filtre=date_filtre,
-                           conducteur_filtre=conducteur_filtre,
-                           itineraire_data=itineraire_data)
+                           conducteur_filtre=conducteur_filtre
+                          )
 
 
 @admin_bp.route("/vehicule/ajouter", methods=["GET", "POST"])
