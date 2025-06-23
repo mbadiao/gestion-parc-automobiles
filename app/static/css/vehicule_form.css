@@ -100,7 +100,7 @@ legend {
     box-shadow: 0 2px 8px rgba(50,50,80,0.07);
 }
 
-.vehicule-form .btn-primary {
+.vehicule-form  .btn-primary {
     background: linear-gradient(90deg, #7e6edb 60%, #4e88ff 100%);
     color: #fff;
 }
@@ -109,12 +109,12 @@ legend {
     background: linear-gradient(90deg, #6b5bcf 60%, #3572f0 100%);
 }
 
-.vehicule-form .btn-secondary {
+.vehicule-form .btn .btn-secondary {
     background: #35355a;
     color: #a992f7;
 }
 
-.vehicule-form .btn-secondary:hover {
+.vehicule-form .btn .btn-secondary:hover {
     background: #23233a;
     color: #fff;
 }

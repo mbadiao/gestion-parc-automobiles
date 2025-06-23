@@ -50,9 +50,6 @@ class Vehicule(db.Model):
     kilometrage = db.Column(db.Integer)
     disponible = db.Column(db.Boolean, default=True)
 
-    assignations = db.relationship("VehiculeAssignation", backref="vehicule")
-    itineraires = db.relationship("Itineraire", backref="vehicule")
-
 # === ASSIGNATION VEHICULE ⇔ CONDUCTEUR ===
 class VehiculeAssignation(db.Model):
     __tablename__ = "vehicule_assignation"
@@ -62,6 +59,9 @@ class VehiculeAssignation(db.Model):
     date_debut = db.Column(db.Date)
     date_fin = db.Column(db.Date)
     active = db.Column(db.Boolean, default=True)
+    
+    # Relations
+    vehicule = db.relationship("Vehicule")
 
 # === ITINERAIRE ===
 class Itineraire(db.Model):
@@ -70,8 +70,12 @@ class Itineraire(db.Model):
     conducteur_id = db.Column(db.Integer, db.ForeignKey("utilisateur.id"))
     vehicule_id = db.Column(db.Integer, db.ForeignKey("vehicule.id"))
     date_trajet = db.Column(db.Date)
-    lieu_depart = db.Column(db.Text)
-    lieu_arrivee = db.Column(db.Text)
+    lieu_depart = db.Column(db.String(255))
+    lieu_arrivee = db.Column(db.String(255))
     distance_km = db.Column(db.Float)
     duree_minutes = db.Column(db.Integer)
-    polyline = db.Column(db.Text)
+    polyline = db.Column(db.Text)  # Coordonnées pour tracer sur la carte
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relations
+    vehicule = db.relationship("Vehicule")

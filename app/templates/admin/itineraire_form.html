@@ -2,102 +2,498 @@
 {% block title %}Ajouter un itinéraire{% endblock %}
 
 {% block content %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/itineraire_form.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/itineraire_form_new.css') }}">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin=""/>
 
 <div class="itineraire-form-wrapper">
-    <h2>Ajouter un itinéraire
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 9l6 6"/><path d="M15 9l-6 6"/></svg>
-    </h2>
-    <form method="POST" id="itineraireForm">
+    <div class="form-header">
+        <h2>Créer un nouvel itinéraire
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M9 9l6 6"/><path d="M15 9l-6 6"/></svg>
+        </h2>
+        
+        <!-- Progress Steps -->
+        <div class="progress-steps">
+            <div class="step active" data-step="1" id="step-indicator-1">
+                <div class="step-number">1</div>
+                <span>Informations</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-step="2" id="step-indicator-2">
+                <div class="step-number">2</div>
+                <span>Lieux</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-step="3" id="step-indicator-3">
+                <div class="step-number">3</div>
+                <span>Carte</span>
+            </div>
+            <div class="step-connector"></div>
+            <div class="step" data-step="4" id="step-indicator-4">
+                <div class="step-number">4</div>
+                <span>Validation</span>
+            </div>
+        </div>
+    </div>    <form method="POST" id="itineraireForm">
         {{ form.hidden_tag() }}
+        {{ form.polyline(type="hidden", id="polyline", class="hidden-field") }}
 
-        <div class="form-group">
-            {{ form.date_trajet.label(class="form-label") }}
-            {{ form.date_trajet(class="form-control", placeholder="Date du trajet") }}
-        </div>
-        <div class="form-group">
-            {{ form.lieu_depart.label(class="form-label") }}
-            {{ form.lieu_depart(class="form-control", id="lieu_depart", placeholder="Lieu de départ") }}
-        </div>
-        <div class="form-group">
-            {{ form.lieu_arrivee.label(class="form-label") }}
-            {{ form.lieu_arrivee(class="form-control", id="lieu_arrivee", placeholder="Lieu d'arrivée") }}
-        </div>
-        <div class="form-group">
-            {{ form.distance_km.label(class="form-label") }}
-            {{ form.distance_km(class="form-control", id="distance_km", placeholder="Distance (km)") }}
-        </div>
-        <div class="form-group">
-            {{ form.duree_minutes.label(class="form-label") }}
-            {{ form.duree_minutes(class="form-control", id="duree_minutes", placeholder="Durée (minutes)") }}
-        </div>
-        {{ form.polyline(type="hidden", id="polyline") }}
-
-        <div class="form-group">
-            <label class="form-label">Tracer l'itinéraire sur la carte</label>
-            <div id="map" style="height: 350px; border-radius: 14px; margin-bottom: 1.2rem;"></div>
-            <div class="map-instructions">
-                <span>Cliquer sur la carte pour définir le départ (vert) et l'arrivée (rouge). Le trajet sera tracé automatiquement.</span>
+        <!-- Étape 1: Informations de base -->
+        <div class="form-step active" id="step-1">
+            <div class="step-content">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-calendar">
+                        <rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/>
+                    </svg>
+                    Quand aura lieu ce trajet ?
+                </h3>
+                <p class="step-description">Sélectionnez la date prévue pour ce trajet.</p>
+                
+                <div class="form-group">
+                    {{ form.date_trajet.label(class="form-label") }}
+                    {{ form.date_trajet(class="form-control", placeholder="Date du trajet") }}
+                </div>
             </div>
         </div>
 
-        <div class="form-nav-btns">
-            <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary">Annuler</a>
-            {{ form.submit(class="btn btn-primary") }}
+        <!-- Étape 2: Définition des lieux -->
+        <div class="form-step" id="step-2">
+            <div class="step-content">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-map-pin">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                    </svg>
+                    Où se déroule le trajet ?
+                </h3>
+                <p class="step-description">Décrivez les lieux de départ et d'arrivée. Vous pourrez les localiser précisément sur la carte ensuite.</p>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        {{ form.lieu_depart.label(class="form-label") }}
+                        <div class="input-with-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play">
+                                <polygon points="5,3 19,12 5,21"/>
+                            </svg>
+                            {{ form.lieu_depart(class="form-control", id="lieu_depart_text", placeholder="Ex: Dakar Centre, Place de l'Indépendance...") }}
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        {{ form.lieu_arrivee.label(class="form-label") }}
+                        <div class="input-with-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-flag">
+                                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+                            </svg>
+                            {{ form.lieu_arrivee(class="form-control", id="lieu_arrivee_text", placeholder="Ex: Almadies, Aéroport LSS...") }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Étape 3: Sélection sur carte -->
+        <div class="form-step" id="step-3">
+            <div class="step-content">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-mouse-pointer">
+                        <path d="M3 3v18l6-6 4 2 5-5-2-4 6-6z"/>
+                    </svg>
+                    Tracez l'itinéraire précis
+                </h3>
+                <p class="step-description">Cliquez sur la carte pour définir les points de départ et d'arrivée exacts.</p>
+                
+                <div class="map-container">
+                    <div id="map"></div>
+                    <div class="map-instructions">
+                        <div class="instruction-item">
+                            <span class="marker-demo start"></span>
+                            <span>1er clic : Point de départ</span>
+                        </div>
+                        <div class="instruction-item">
+                            <span class="marker-demo end"></span>
+                            <span>2ème clic : Point d'arrivée</span>
+                        </div>
+                        <div class="instruction-note">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+                            </svg>
+                            Le trajet sera calculé automatiquement
+                        </div>
+                    </div>
+                </div>
+                  <!-- Champs cachés pour les coordonnées précises -->
+                <input type="hidden" id="lieu_depart_coords" name="lieu_depart" class="hidden-field">
+                <input type="hidden" id="lieu_arrivee_coords" name="lieu_arrivee" class="hidden-field">
+                {{ form.distance_km(type="hidden", id="distance_km", class="hidden-field") }}
+                {{ form.duree_minutes(type="hidden", id="duree_minutes", class="hidden-field") }}
+            </div>
+        </div>
+
+        <!-- Étape 4: Validation -->
+        <div class="form-step" id="step-4">
+            <div class="step-content">
+                <h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-check-circle">
+                        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22,4 12,14.01 9,11.01"/>
+                    </svg>
+                    Récapitulatif et validation
+                </h3>
+                <p class="step-description">Vérifiez les informations avant de créer l'itinéraire.</p>
+                
+                <div class="recap-container">
+                    <div class="recap-section">
+                        <h4>Informations du trajet</h4>
+                        <div class="recap-grid">
+                            <div class="recap-item">
+                                <span class="recap-label">Date</span>
+                                <span class="recap-value" id="recap-date">-</span>
+                            </div>
+                            <div class="recap-item">
+                                <span class="recap-label">Départ</span>
+                                <span class="recap-value" id="recap-depart">-</span>
+                            </div>
+                            <div class="recap-item">
+                                <span class="recap-label">Arrivée</span>
+                                <span class="recap-value" id="recap-arrivee">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="recap-section" id="route-details" style="display: none;">
+                        <h4>Détails du trajet</h4>
+                        <div class="recap-grid">
+                            <div class="recap-item">
+                                <span class="recap-label">Distance</span>
+                                <span class="recap-value"><span id="recap-distance">0</span> km</span>
+                            </div>
+                            <div class="recap-item">
+                                <span class="recap-label">Durée estimée</span>
+                                <span class="recap-value"><span id="recap-duree">0</span> min</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>        <!-- Navigation entre étapes -->
+        <div class="form-navigation">
+            <button type="button" class="btn btn-secondary" id="prev-btn" style="display: none;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m15 18-6-6 6-6"/><path d="m9 18-6-6 6-6"/>
+                </svg>
+                Précédent
+            </button>
+            
+            <div class="nav-center">
+                <a href="{{ url_for('admin.dashboard') }}" class="btn btn-outline">Annuler</a>
+            </div>
+            
+            <button type="button" class="btn btn-primary" id="next-btn">
+                Suivant
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="m9 18 6-6-6-6"/><path d="m15 18 6-6-6-6"/>
+                </svg>
+            </button>
+            
+            {{ form.submit(class="btn btn-success", id="submit-btn", style="display: none;") }}
         </div>
     </form>
 </div>
 
 <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
 <script>
-let map = L.map('map').setView([14.6928, -17.4467], 12);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
+let map, markers = [], polyline = null;
+let currentStep = 1;
+const totalSteps = 4;
 
-let markers = [];
-let polyline = null;
+// Variables pour stocker les données du formulaire
+let formData = {
+    date: '',
+    departText: '',
+    arriveeText: '',
+    departCoords: null,
+    arriveeCoords: null,
+    distance: 0,
+    duree: 0,
+    polylineData: ''
+};
 
-function updatePolyline() {
-    if (polyline) map.removeLayer(polyline);
+// Gestion des étapes
+function showStep(step) {
+    // Masquer toutes les étapes
+    document.querySelectorAll('.form-step').forEach(el => {
+        el.classList.remove('active');
+    });
+    document.querySelectorAll('.step').forEach(el => {
+        el.classList.remove('active', 'completed');
+    });
+    
+    // Marquer les étapes précédentes comme complétées
+    for (let i = 1; i < step; i++) {
+        document.getElementById(`step-indicator-${i}`).classList.add('completed');
+    }
+    
+    // Afficher l'étape courante
+    document.getElementById(`step-${step}`).classList.add('active');
+    document.getElementById(`step-indicator-${step}`).classList.add('active');
+    
+    // Gérer la navigation
+    const prevBtn = document.getElementById('prev-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    if (step === 1) {
+        prevBtn.style.display = 'none';
+        nextBtn.style.display = 'flex';
+        submitBtn.style.display = 'none';
+    } else if (step === totalSteps) {
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'none';
+        submitBtn.style.display = 'flex';
+        updateRecap();
+    } else {
+        prevBtn.style.display = 'flex';
+        nextBtn.style.display = 'flex';
+        submitBtn.style.display = 'none';
+    }
+    
+    // Initialiser la carte à l'étape 3
+    if (step === 3 && !map) {
+        setTimeout(initMap, 100);
+    }
+    
+    currentStep = step;
+}
+
+function nextStep() {
+    if (validateCurrentStep()) {
+        if (currentStep < totalSteps) {
+            saveStepData();
+            showStep(currentStep + 1);
+        }
+    }
+}
+
+function prevStep() {
+    if (currentStep > 1) {
+        showStep(currentStep - 1);
+    }
+}
+
+function validateCurrentStep() {
+    switch (currentStep) {
+        case 1:
+            const dateInput = document.querySelector('input[name="date_trajet"]');
+            if (!dateInput.value) {
+                showNotification('Veuillez sélectionner une date pour le trajet.', 'error');
+                return false;
+            }
+            break;
+            
+        case 2:
+            const depart = document.getElementById('lieu_depart_text').value.trim();
+            const arrivee = document.getElementById('lieu_arrivee_text').value.trim();
+            if (!depart || !arrivee) {
+                showNotification('Veuillez renseigner les lieux de départ et d\'arrivée.', 'error');
+                return false;
+            }
+            if (depart === arrivee) {
+                showNotification('Le lieu de départ et d\'arrivée ne peuvent pas être identiques.', 'error');
+                return false;
+            }
+            break;
+            
+        case 3:
+            if (markers.length < 2 || !polyline) {
+                showNotification('Veuillez sélectionner les points de départ et d\'arrivée sur la carte.', 'error');
+                return false;
+            }
+            break;
+    }
+    return true;
+}
+
+function saveStepData() {
+    switch (currentStep) {
+        case 1:
+            formData.date = document.querySelector('input[name="date_trajet"]').value;
+            break;
+        case 2:
+            formData.departText = document.getElementById('lieu_depart_text').value;
+            formData.arriveeText = document.getElementById('lieu_arrivee_text').value;
+            break;
+        case 3:
+            if (markers.length >= 2) {
+                formData.departCoords = markers[0].getLatLng();
+                formData.arriveeCoords = markers[1].getLatLng();
+                formData.distance = document.getElementById('distance_km').value;
+                formData.duree = document.getElementById('duree_minutes').value;
+                formData.polylineData = document.getElementById('polyline').value;
+            }
+            break;
+    }
+}
+
+function updateRecap() {
+    document.getElementById('recap-date').textContent = formData.date || 'Non définie';
+    document.getElementById('recap-depart').textContent = formData.departText || 'Non défini';
+    document.getElementById('recap-arrivee').textContent = formData.arriveeText || 'Non défini';
+    
+    if (formData.distance > 0) {
+        document.getElementById('recap-distance').textContent = formData.distance;
+        document.getElementById('recap-duree').textContent = formData.duree;
+        document.getElementById('route-details').style.display = 'block';
+    }
+}
+
+// Initialisation de la carte
+function initMap() {
+    map = L.map('map').setView([14.6928, -17.4467], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    map.on('click', function(e) {
+        if (markers.length >= 2) {
+            // Réinitialiser si on a déjà 2 marqueurs
+            clearMap();
+        }
+          let color = markers.length === 0 ? "#a992f7" : "#7c3aed";
+        let marker = L.circleMarker(e.latlng, {
+            radius: 12, 
+            color: color, 
+            fillColor: color, 
+            fillOpacity: 0.8,
+            weight: 3
+        }).addTo(map);
+        
+        markers.push(marker);
+        
+        if (markers.length === 1) {
+            document.getElementById('lieu_depart_coords').value = `${e.latlng.lat.toFixed(6)},${e.latlng.lng.toFixed(6)}`;
+            showNotification('Point de départ défini ! Cliquez pour définir l\'arrivée.', 'success');
+        } else if (markers.length === 2) {
+            document.getElementById('lieu_arrivee_coords').value = `${e.latlng.lat.toFixed(6)},${e.latlng.lng.toFixed(6)}`;
+            calculateRoute();
+        }
+    });
+}
+
+function clearMap() {
+    markers.forEach(m => map.removeLayer(m));
+    markers = [];
+    if (polyline) { 
+        map.removeLayer(polyline); 
+        polyline = null; 
+    }
+    document.getElementById('polyline').value = '';
+    document.getElementById('distance_km').value = '';
+    document.getElementById('duree_minutes').value = '';
+}
+
+function calculateRoute() {
     if (markers.length === 2) {
-        // Appel à l'API OSRM pour le routage
+        showNotification('Calcul de l\'itinéraire en cours...', 'info');
+        
         const url = `https://router.project-osrm.org/route/v1/driving/${markers[0].getLatLng().lng},${markers[0].getLatLng().lat};${markers[1].getLatLng().lng},${markers[1].getLatLng().lat}?overview=full&geometries=geojson`;
+        
         fetch(url)
-            .then(res => res.json())
+            .then(res => {
+                if (!res.ok) throw new Error('Erreur réseau');
+                return res.json();
+            })
             .then(data => {
                 if (data.routes && data.routes.length) {
-                    const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
-                    polyline = L.polyline(coords, {color: '#a992f7', weight: 5}).addTo(map);
-                    map.fitBounds(polyline.getBounds(), {padding: [40, 40]});
-                    // Remplir les champs distance/durée/polyline
-                    document.getElementById('distance_km').value = (data.routes[0].distance/1000).toFixed(2);
-                    document.getElementById('duree_minutes').value = Math.round(data.routes[0].duration/60);
+                    const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);                    polyline = L.polyline(coords, {
+                        color: '#a992f7', 
+                        weight: 6,
+                        opacity: 0.9
+                    }).addTo(map);
+                    
+                    map.fitBounds(polyline.getBounds(), {padding: [20, 20]});
+                    
+                    // Remplir les champs calculés
+                    const distance = (data.routes[0].distance / 1000).toFixed(2);
+                    const duree = Math.round(data.routes[0].duration / 60);
+                    
+                    document.getElementById('distance_km').value = distance;
+                    document.getElementById('duree_minutes').value = duree;
                     document.getElementById('polyline').value = JSON.stringify(coords);
+                    
+                    showNotification(`Itinéraire calculé : ${distance} km, ${duree} minutes`, 'success');
+                } else {
+                    throw new Error('Aucun itinéraire trouvé');
                 }
+            })
+            .catch(err => {
+                console.error('Erreur lors du calcul de l\'itinéraire:', err);
+                showNotification('Impossible de calculer l\'itinéraire. Vérifiez votre connexion.', 'error');
+                clearMap();
             });
     }
 }
 
-map.on('click', function(e) {
-    if (markers.length >= 2) {
-        markers.forEach(m => map.removeLayer(m));
-        markers = [];
-        if (polyline) { map.removeLayer(polyline); polyline = null; }
-        document.getElementById('polyline').value = '';
-        document.getElementById('distance_km').value = '';
-        document.getElementById('duree_minutes').value = '';
+function showNotification(message, type = 'info') {
+    // Créer ou récupérer le conteneur de notifications
+    let container = document.querySelector('.notification-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.className = 'notification-container';
+        document.body.appendChild(container);
     }
-    let color = markers.length === 0 ? "#3fd18b" : "#e74c3c";
-    let marker = L.circleMarker(e.latlng, {radius: 8, color: color, fillColor: color, fillOpacity: 1}).addTo(map);
-    markers.push(marker);
-    if (markers.length === 1) {
-        document.getElementById('lieu_depart').value = `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-    } else if (markers.length === 2) {
-        document.getElementById('lieu_arrivee').value = `${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}`;
-        updatePolyline();
+    
+    const notification = document.createElement('div');
+    notification.className = `notification notification-${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span>${message}</span>            <button onclick="closeNotification(this)" class="notification-close">&times;</button>
+        </div>
+    `;
+    
+    container.appendChild(notification);
+    
+    // Animation d'entrée
+    requestAnimationFrame(() => {
+        notification.style.transform = 'translateX(0)';
+        notification.style.opacity = '1';
+    });
+    
+    // Disparition automatique après 5 secondes
+    setTimeout(() => {
+        hideNotification(notification);
+    }, 5000);
+}
+
+function hideNotification(notification) {
+    if (notification && notification.parentNode) {
+        notification.classList.add('fade-out');
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
     }
+}
+
+function closeNotification(button) {
+    const notification = button.closest('.notification');
+    hideNotification(notification);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    showStep(1);
+    
+    // Navigation buttons
+    document.getElementById('next-btn').addEventListener('click', nextStep);
+    document.getElementById('prev-btn').addEventListener('click', prevStep);
+    
+    // Form submission
+    document.getElementById('itineraireForm').addEventListener('submit', function(e) {
+        // Mettre à jour les champs cachés avec les valeurs de texte pour lieu_depart et lieu_arrivee
+        document.querySelector('input[name="lieu_depart"]').value = formData.departText;
+        document.querySelector('input[name="lieu_arrivee"]').value = formData.arriveeText;
+        
+        showNotification('Création de l\'itinéraire...', 'info');
+    });
 });
 </script>
+
 {% endblock %}

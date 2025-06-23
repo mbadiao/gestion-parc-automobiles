@@ -15,7 +15,20 @@ def dashboard():
     profil = ConducteurProfil.query.filter_by(utilisateur_id=current_user.id).first()
     assignation = VehiculeAssignation.query.filter_by(conducteur_id=current_user.id, active=True).first()
     vehicule = Vehicule.query.get(assignation.vehicule_id) if assignation else None
-    trajets = Itineraire.query.filter_by(conducteur_id=current_user.id).order_by(Itineraire.date_trajet.desc()).limit(10).all()
+    trajets_query = Itineraire.query.filter_by(conducteur_id=current_user.id).order_by(Itineraire.date_trajet.desc()).limit(10).all()
+
+    # Convertir les objets Itineraire en dictionnaires pour la sérialisation JSON
+    trajets = []
+    for trajet in trajets_query:
+        trajets.append({
+            'id': trajet.id,
+            'date_trajet': trajet.date_trajet.strftime('%Y-%m-%d') if trajet.date_trajet else '',
+            'lieu_depart': trajet.lieu_depart,
+            'lieu_arrivee': trajet.lieu_arrivee,
+            'distance_km': float(trajet.distance_km) if trajet.distance_km else 0,
+            'duree_minutes': trajet.duree_minutes,
+            'polyline': trajet.polyline
+        })
 
     return render_template("conducteur/dashboard.html", profil=profil, vehicule=vehicule, trajets=trajets)
 

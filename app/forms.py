@@ -41,6 +41,7 @@ class VehiculeForm(FlaskForm):
     ], validators=[DataRequired()])
     puissance = IntegerField("Puissance")
     kilometrage = IntegerField("Kilométrage")
+    description = TextAreaField("Description", validators=[Optional()])
     disponible = BooleanField("Disponible", default=True)
     submit = SubmitField("Enregistrer le véhicule")
 

@@ -98,12 +98,77 @@ def modifier_vehicule(vehicule_id):
     form = VehiculeForm(obj=vehicule)
 
     if form.validate_on_submit():
-        form.populate_obj(vehicule)
-        db.session.commit()
-        flash("Véhicule mis à jour", "success")
-        return redirect(url_for("admin.dashboard_admin"))
+        try:
+            # Mettre à jour les champs du véhicule
+            vehicule.marque = form.marque.data
+            vehicule.modele = form.modele.data
+            vehicule.annee = form.annee.data
+            vehicule.immatriculation = form.immatriculation.data
+            vehicule.couleur_exterieure = form.couleur_exterieure.data
+            vehicule.couleur_interieure = form.couleur_interieure.data
+            vehicule.type_carburant = form.type_carburant.data
+            vehicule.transmission = form.transmission.data
+            vehicule.puissance = form.puissance.data
+            vehicule.kilometrage = form.kilometrage.data
+            vehicule.description = form.description.data
+            vehicule.disponible = form.disponible.data
+            
+            db.session.commit()
+            flash(f"Véhicule {vehicule.marque} {vehicule.modele} mis à jour avec succès", "success")
+            return redirect(url_for("admin.dashboard"))
+        except IntegrityError as e:
+            db.session.rollback()
+            if "vehicule_immatriculation_key" in str(e.orig):
+                flash("Cette immatriculation existe déjà.", "danger")
+            else:
+                flash("Erreur lors de la mise à jour du véhicule.", "danger")
+    elif request.method == "POST":
+        # Afficher les erreurs du formulaire
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Erreur dans le champ '{getattr(form, field).label.text}': {error}", "danger")
 
-    return render_template("admin/modifier_vehicule.html", form=form)
+    return render_template("admin/modifier_vehicule.html", form=form, vehicule=vehicule)
+
+
+@admin_bp.route("/vehicule/supprimer/<int:vehicule_id>", methods=["POST"])
+@login_required
+def supprimer_vehicule(vehicule_id):
+    if current_user.role != 'admin':
+        flash("Accès interdit", "danger")
+        return redirect(url_for("auth.login"))
+
+    vehicule = Vehicule.query.get_or_404(vehicule_id)
+    nom_vehicule = f"{vehicule.marque} {vehicule.modele} ({vehicule.immatriculation})"
+    
+    try:
+        # Vérifier s'il y a des assignations actives
+        assignation_active = VehiculeAssignation.query.filter_by(
+            vehicule_id=vehicule_id, 
+            active=True
+        ).first()
+        
+        if assignation_active:
+            flash(f"Impossible de supprimer le véhicule {nom_vehicule} : il est actuellement attribué à un conducteur. Veuillez d'abord retirer l'attribution.", "danger")
+            return redirect(url_for("admin.modifier_vehicule", vehicule_id=vehicule_id))
+        
+        # Supprimer toutes les assignations historiques
+        VehiculeAssignation.query.filter_by(vehicule_id=vehicule_id).delete()
+        
+        # Supprimer tous les itinéraires associés
+        Itineraire.query.filter_by(vehicule_id=vehicule_id).delete()
+        
+        # Supprimer le véhicule
+        db.session.delete(vehicule)
+        db.session.commit()
+        
+        flash(f"Véhicule {nom_vehicule} supprimé avec succès", "success")
+        return redirect(url_for("admin.dashboard"))
+        
+    except Exception as e:
+        db.session.rollback()
+        flash(f"Erreur lors de la suppression du véhicule : {str(e)}", "danger")
+        return redirect(url_for("admin.modifier_vehicule", vehicule_id=vehicule_id))
 
 
 @admin_bp.route("/vehicule/attribuer/<int:conducteur_id>", methods=["GET", "POST"])

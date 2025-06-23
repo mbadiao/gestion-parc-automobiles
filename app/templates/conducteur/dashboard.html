@@ -10,7 +10,7 @@
             {% for trajet in trajets %}
             <div class="trajet-card{% if loop.first %} active{% endif %}" data-trajet="{{ trajet.id }}" onclick="selectTrajet({{ trajet.id }})">
                 <div class="trajet-header">
-                    <span class="trajet-date">{{ trajet.date_trajet.strftime('%d/%m/%Y') }}</span>
+                    <span class="trajet-date">{{ trajet.date_trajet }}</span>
                     {% if loop.first %}
                     <span class="badge badge-en-cours">En cours</span>
                     {% endif %}
@@ -34,26 +34,29 @@
         </div>
     </aside>
     <section class="map-section">
-        <div id="map" style="height: 100%; min-height: 500px; border-radius: 18px;"></div>
+        <div id="map"></div>
     </section>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<!-- Leaflet CSS & JS -->
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" crossorigin=""/>
-<script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js" crossorigin=""></script>
 <script>
-    const trajets = {{ trajets | tojson }};
+    console.log('Script chargé');
+    const trajets = {{ trajets | tojson | safe }};
+    console.log('Trajets:', trajets);
+    
     let map, polylines = [];
 
     function showTrajetOnMap(trajet) {
+        console.log('Affichage trajet:', trajet);
         // Efface les anciens polylines
         polylines.forEach(p => map.removeLayer(p));
         polylines = [];
+        
         if (trajet.polyline) {
             try {
                 const coords = JSON.parse(trajet.polyline);
+                console.log('Coordonnées:', coords);
                 const latlngs = coords.map(c => [c[0], c[1]]);
                 const poly = L.polyline(latlngs, {color: '#a992f7', weight: 5}).addTo(map);
                 polylines.push(poly);
@@ -68,6 +71,7 @@
     }
 
     function selectTrajet(id) {
+        console.log('Sélection trajet ID:', id);
         document.querySelectorAll('.trajet-card').forEach(card => card.classList.remove('active'));
         const card = document.querySelector('.trajet-card[data-trajet="'+id+'"]');
         if(card) card.classList.add('active');
@@ -76,11 +80,35 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
-        map = L.map('map').setView([14.6928, -17.4467], 12);
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-        if(trajets.length) showTrajetOnMap(trajets[0]);
+        console.log('DOM chargé, initialisation de la carte');
+        if (typeof L === 'undefined') {
+            console.error('Leaflet non chargé !');
+            return;
+        }
+        
+        const mapElement = document.getElementById('map');
+        if (!mapElement) {
+            console.error('Élément map non trouvé !');
+            return;
+        }
+        
+        try {
+            map = L.map('map').setView([14.6928, -17.4467], 12);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(map);
+            
+            console.log('Carte initialisée avec succès');
+            
+            if(trajets && trajets.length > 0) {
+                console.log('Affichage du premier trajet');
+                showTrajetOnMap(trajets[0]);
+            } else {
+                console.log('Aucun trajet à afficher');
+            }
+        } catch (e) {
+            console.error('Erreur lors de l\'initialisation de la carte:', e);
+        }
     });
 </script>
 {% endblock %}

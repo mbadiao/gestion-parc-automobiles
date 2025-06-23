@@ -70,10 +70,19 @@
                         <span class="badge badge-attribue"><i class="fa-solid fa-car-side"></i> Attribué</span>
                     {% endif %}
                 </td>
-                <td data-label="Actions">
+                <td data-label="Actions" class="actions-cell">
                     <a href="{{ url_for('admin.modifier_vehicule', vehicule_id=v.id) }}" class="btn btn-sm btn-info">
                         <i class="fa-solid fa-pen-to-square"></i> Modifier
                     </a>
+                    {% if v.disponible %}
+                    <button class="btn btn-sm btn-danger" onclick="supprimerVehicule({{ v.id }}, '{{ v.marque }}', '{{ v.modele }}', '{{ v.immatriculation }}')">
+                        <i class="fa-solid fa-trash"></i> Supprimer
+                    </button>
+                    {% else %}
+                    <span class="btn btn-sm btn-secondary" style="opacity: 0.6; cursor: not-allowed;" title="Véhicule attribué - impossible de supprimer">
+                        <i class="fa-solid fa-lock"></i> Protégé
+                    </span>
+                    {% endif %}
                 </td>
             </tr>
             {% endfor %}
@@ -157,6 +166,31 @@ function showTab(tab) {
         document.getElementById('tab-conducteurs').classList.remove('btn-secondary');
         document.getElementById('tab-vehicules').classList.remove('btn-primary');
         document.getElementById('tab-vehicules').classList.add('btn-secondary');
+    }
+}
+
+function supprimerVehicule(vehiculeId, marque, modele, immatriculation) {
+    const nomComplet = `${marque} ${modele} (${immatriculation})`;
+    
+    if (confirm(`Êtes-vous absolument sûr de vouloir supprimer le véhicule ${nomComplet} ?\n\nCette action est irréversible et supprimera également :\n- Toutes les assignations historiques\n- Tous les itinéraires associés\n\nTapez "SUPPRIMER" pour confirmer.`)) {
+        // Création d'un formulaire temporaire pour la suppression
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/vehicule/supprimer/${vehiculeId}`;
+        form.style.display = 'none';
+        
+        // Ajouter le token CSRF si nécessaire
+        const csrfToken = document.querySelector('input[name="csrf_token"]');
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = csrfToken.value;
+            form.appendChild(csrfInput);
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
     }
 }
 </script>
