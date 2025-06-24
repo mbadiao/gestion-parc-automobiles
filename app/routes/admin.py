@@ -104,14 +104,13 @@ def modifier_vehicule(vehicule_id):
             vehicule.modele = form.modele.data
             vehicule.annee = form.annee.data
             vehicule.immatriculation = form.immatriculation.data
-            vehicule.couleur_exterieure = form.couleur_exterieure.data
-            vehicule.couleur_interieure = form.couleur_interieure.data
+            vehicule.couleur = form.couleur.data
             vehicule.type_carburant = form.type_carburant.data
             vehicule.transmission = form.transmission.data
-            vehicule.puissance = form.puissance.data
             vehicule.kilometrage = form.kilometrage.data
+            vehicule.numero_chassis = form.numero_chassis.data
             vehicule.description = form.description.data
-            vehicule.disponible = form.disponible.data
+            vehicule.actif = form.actif.data
             
             db.session.commit()
             flash(f"Véhicule {vehicule.marque} {vehicule.modele} mis à jour avec succès", "success")
