@@ -24,6 +24,11 @@ def create_app():
     
     db.init_app(app)
     login_manager.init_app(app)
+    
+    # Configuration Flask-Login
+    login_manager.login_view = 'auth.login'
+    login_manager.login_message = 'Veuillez vous connecter pour accéder à cette page.'
+    login_manager.login_message_category = 'info'
 
     # ✅ Bon import selon ta structure
     from app.routes import register_blueprints

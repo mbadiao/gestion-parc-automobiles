@@ -10,23 +10,39 @@ auth_bp = Blueprint("auth", __name__)
 # Fonction de chargement de l'utilisateur pour Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
-    return Utilisateur.query.get(int(user_id))
+    try:
+        return Utilisateur.query.get(int(user_id))
+    except:
+        return None
+
+# Gestionnaire pour les utilisateurs non autorisés
+@login_manager.unauthorized_handler
+def unauthorized():
+    flash("Votre session a expiré. Veuillez vous reconnecter.", "warning")
+    return redirect(url_for('auth.login'))
 
 # Page de connexion
 @auth_bp.route("/", methods=["GET", "POST"])
 def login():
+    # Si l'utilisateur semble connecté mais que les données sont corrompues
     if current_user.is_authenticated:
-        if current_user.role == 'admin':
-            return redirect(url_for("admin.dashboard"))
-        else:
-            return redirect(url_for("conducteur.dashboard"))
+        try:
+            # Tester l'accès aux propriétés de l'utilisateur
+            role = current_user.role
+            if role == 'admin':
+                return redirect(url_for("admin.dashboard"))
+            else:
+                return redirect(url_for("conducteur.dashboard"))
+        except:
+            # Si erreur, déconnecter l'utilisateur
+            logout_user()
+            flash("Session corrompue. Veuillez vous reconnecter.", "warning")
 
     form = ConnexionForm()
     if form.validate_on_submit():
         user = Utilisateur.query.filter_by(email=form.email.data).first()
         if user and user.mot_de_passe == form.mot_de_passe.data:
             login_user(user, remember=form.se_souvenir.data)
-            # flash("Connexion réussie ✅", "success")
             next_page = request.args.get("next")
             return redirect(next_page or url_for("conducteur.dashboard" if user.role == "conducteur" else "admin.dashboard"))
         else:
